@@ -3,7 +3,7 @@ import { UserDetailContext } from '@/context/UserDetailContext';
 import { supabase } from '@/services/supabaseClient'
 import React, {useContext, useEffect, useState} from 'react'
 
-function Provider({children}) {
+function Provider({ children  }) {
 
     const [user, setUser] = useState();
 
@@ -11,7 +11,7 @@ function Provider({children}) {
         CreateNewUser();
     },[])
 
-    const CreateNewUser=()=>{
+    const CreateNewUser = () => {
 
         supabase.auth.getUser().then(async({ data : { user } })=>{
 
