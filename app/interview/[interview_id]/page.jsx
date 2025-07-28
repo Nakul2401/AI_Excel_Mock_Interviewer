@@ -55,14 +55,13 @@ function Interview() {
             .select('*')
             .eq('interview_id', interview_id)
 
-
         // console.log(Interviews[0]);
         setInterviewInfo({
             userName: userName,
             interviewData: Interviews[0]
         });
+        
         router.push('/interview/'+interview_id+'/start')
-
         setLoading(false);
         
     }
