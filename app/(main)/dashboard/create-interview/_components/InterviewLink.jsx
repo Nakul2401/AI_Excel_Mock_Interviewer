@@ -21,6 +21,10 @@ function InterviewLink({ interview_id, formData}) {
         toast('Link Copied')
     }
 
+    const onShareLink = () => {
+        toast('Feature not configured, You can copy link')
+    }
+
     const numbersOfQuestions = async() => {
         let { data: Interviews, error } = await supabase
         .from('Interviews')
@@ -70,9 +74,9 @@ function InterviewLink({ interview_id, formData}) {
         </div>
 
         <div className='mt-5 bg-white p-7 rounded-lg w-full'>
-            <h2 className='font-bold'>Share Via</h2>
+            <h2 className='font-bold'>Share Via </h2>
             <div className='flex mt-3 justify-between items-center'>
-                <Button className='w-60 border border-primary text-black bg-white hover:bg-primary hover:text-white hover:border-0'><Mail/> Email</Button>
+                <Button className='w-60 border border-primary text-black bg-white hover:bg-primary hover:text-white hover:border-0' onClick={()=>onShareLink()}><Mail/> Email</Button>
                 <Button className='w-60 border border-primary text-black bg-white hover:bg-primary hover:text-white hover:border-0'><MessageCircleMore/> Whatsapp</Button>
                 <Button className='w-60 border border-primary text-black bg-white hover:bg-primary hover:text-white hover:border-0'><Slack/> Slack</Button>
             </div>
