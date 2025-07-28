@@ -18,11 +18,20 @@ function InterviewLink({ interview_id, formData}) {
 
     const onCopyLink = async() => {
         await navigator.clipboard.writeText(url);
-        toast('Link Copied')
+        toast('Link Copied', {
+            style: {
+                background: 'white',
+                color: 'black',
+                border: '2px solid #00FF00',
+                borderRadius: '8px',
+                padding: '12px 16px',
+                fontSize: '14px'
+            }
+        });
     }
 
     const onShareLink = () => {
-        toast('Feature not configured, You can copy link')
+        toast('Feature not configured!, You can copy link')
     }
 
     const numbersOfQuestions = async() => {
