@@ -29,7 +29,9 @@ import { usePathname } from "next/navigation"
             width={200}
             height={100}
             className='w-[210px] '/>
-            <Button className="w-full h-[40px] mt-5 mb-3"> <Plus/> Create New Interview </Button>
+            <Link href={'/dashboard/create-interview'} className='w-50 mt-5 mb-3'>
+            <Button className="w-full h-[40px] cursor-pointer"> <Plus/> Create New Interview </Button>
+            </Link>
         </SidebarHeader>
         <SidebarContent>
           <SidebarGroup>
