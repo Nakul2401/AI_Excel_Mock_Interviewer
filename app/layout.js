@@ -26,7 +26,13 @@ export default function RootLayout({ children }) {
       >
         <Provider>
           {children}
-          <Toaster />
+          <Toaster theme="dark" toastOptions={{
+                                                  style: {
+                                                      background: '#000000',
+                                                      color: '#ffffff',
+                                                      border: '3px solid #D30000'
+                                                  }
+                                              }}/>
         </Provider>
       </body>
     </html>

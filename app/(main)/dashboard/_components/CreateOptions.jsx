@@ -1,8 +1,15 @@
+"use client"
 import { Phone, Video } from 'lucide-react'
 import Link from 'next/link'
 import React from 'react'
+import { toast } from 'sonner'
 
 function CreateOptions() {
+
+    const onPhoneScreen = () => {
+        toast('Feature not added, please continue with another option !');
+    }
+
   return (
     <div className='grid grid-cols-2 gap-5'>
         <Link href={'/dashboard/create-interview'} className='bg-white border border-gray-200 rounded-lg p-7 flex justify-between items-center cursor-pointer hover:bg-gray-50'>
@@ -13,7 +20,7 @@ function CreateOptions() {
             </div>
         </Link>
 
-        <div className='bg-white border border-gray-200 rounded-lg p-10 flex justify-between items-center hover:bg-gray-50'>
+        <div className='bg-white border border-gray-200 rounded-lg p-10 flex justify-between items-center hover:bg-gray-50' onClick={()=>onPhoneScreen()}>
             <Phone className='p-3 text-primary bg-[#f2d9c4] rounded-lg h-12 w-12'/>
             <div>
                 <h2 className='font-bold'>Create Phone Screening Call</h2>

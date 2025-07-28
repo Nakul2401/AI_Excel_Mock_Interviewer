@@ -77,8 +77,8 @@ function InterviewLink({ interview_id, formData}) {
             <h2 className='font-bold'>Share Via </h2>
             <div className='flex mt-3 justify-between items-center'>
                 <Button className='w-60 border border-primary text-black bg-white hover:bg-primary hover:text-white hover:border-0' onClick={()=>onShareLink()}><Mail/> Email</Button>
-                <Button className='w-60 border border-primary text-black bg-white hover:bg-primary hover:text-white hover:border-0'><MessageCircleMore/> Whatsapp</Button>
-                <Button className='w-60 border border-primary text-black bg-white hover:bg-primary hover:text-white hover:border-0'><Slack/> Slack</Button>
+                <Button className='w-60 border border-primary text-black bg-white hover:bg-primary hover:text-white hover:border-0' onClick={()=>onShareLink()}><MessageCircleMore/> Whatsapp</Button>
+                <Button className='w-60 border border-primary text-black bg-white hover:bg-primary hover:text-white hover:border-0' onClick={()=>onShareLink()}><Slack/> Slack</Button>
             </div>
         </div>
 
