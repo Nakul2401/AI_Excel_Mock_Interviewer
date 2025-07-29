@@ -15,6 +15,7 @@ function Interview() {
     const {interview_id} = useParams();
     const [interviewData, setInterviewData] = useState();
     const [userName, setUserName] = useState();
+    const [candidateEmail, setCandidateEmail] = useState();
     const [loading, setLoading] = useState(false);
     const {interviewInfo, setInterviewInfo} = useContext(InterviewDataContext);
 
@@ -58,6 +59,7 @@ function Interview() {
         // console.log(Interviews[0]);
         setInterviewInfo({
             userName: userName,
+            candidateEmail: candidateEmail,
             interviewData: Interviews[0]
         });
         
@@ -80,9 +82,13 @@ function Interview() {
                 <h2 className='font-bold text-xl'>{interviewData?.jobRole}</h2>
                 <h2 className='flex gap-2 items-center text-gray-500 mt-2'><Clock className='h-4 w-4'/> {interviewData?.duration}</h2>
 
-                <div className='w-full mt-3'>
+                <div className='w-full mt-3 mb-2'>
                     <h2 className='mb-1'>Enter Your Full Name:</h2>
                     <Input placeholder='Full Name' onChange={(event)=>setUserName(event.target.value)}/>
+                </div>
+                <div className='w-full mt-3'>
+                    <h2 className='mb-1'>Enter Your Email:</h2>
+                    <Input placeholder='email' onChange={(event)=>setCandidateEmail(event.target.value)}/>
                 </div>
                 
                 <div className='p-4 bg-[#f2d9c4] flex gap-4 rounded-lg mt-10'>

@@ -76,3 +76,27 @@ format:
 
 The goal is to create a structured, relevant, and time-efficient set of questions for a {{jobRole}} role.`
 
+
+
+export const FEEDBACK_PROMPT = `
+{{conversation}}
+
+Your are an Data Analyst with skills in Microsoft Excel who assess interview conversation between assistant and candidate. Depending on above Interview Conversation between assitant and candidate, 
+Give me feedback for candidate interview. Give me rating out of 10 for technical Skills, Communication, Problem Solving, Experience.
+Also give me brief summary about the interview and one line to let me know whether candidate is recommended to be hired for the role Data Analyst (Microsoft Excel) in company or not with message. 
+
+Give me response in valid JSON format:
+{
+    feedback:{
+        rating:{
+            techicalSkills:,
+            communication:,
+            problemSolving:,
+            experience:
+        },
+        summary:'<brief summary>',
+        recommendation:'',
+        recommendationMessage:''
+    }
+}
+`
