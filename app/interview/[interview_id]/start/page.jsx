@@ -30,12 +30,20 @@ function StartInterview() {
     const [loading, setLoading] = useState(false);
     const [isCallActive, setIsCallActive] = useState(CallStatus.INACTIVE);
 
+    const [startTime, setStartTime] = useState(null);
+    const [elapsedTime, setElapsedTime] = useState(0);
+    const [duration, setDuration] = useState('00:00:00');
+    const timerRef = useRef(null);
+
     const vapiRef = useRef(null);
     
     useEffect(() => {
         return () => {
           if (vapiRef.current) {
             vapiRef.current.destroy?.();
+          }
+          if (timerRef.current) {
+            clearInterval(timerRef.current);
           }
         };
       }, []);
@@ -46,7 +54,7 @@ function StartInterview() {
                 style: {
                     background: 'white',
                     color: 'black',
-                    border: '2px solid blue-500',
+                    border: '2px solid #0000FF',
                     borderRadius: '8px',
                     padding: '12px 16px',
                     fontSize: '14px'
@@ -58,7 +66,7 @@ function StartInterview() {
 
     
     useEffect(() => {
-        if (isCallActive === CallStatus.FINISHED){
+        if (isCallActive === CallStatus.FINISHED){ 
             router.replace('/interview/'+interview_id+"/completed");
             GenerateFeedback();
         }
@@ -95,6 +103,7 @@ function StartInterview() {
         const handleCallStart = () => {
             console.log('Call has started.');
             setIsCallActive(CallStatus.ACTIVE);
+            startTimer();
             toast('Call Connected...',{
                 style: {
                     background: 'white',
@@ -109,6 +118,7 @@ function StartInterview() {
 
         const handleCallEnd = () => {
             console.log('Call has ended.');
+            stopTimer();
             setIsCallActive(CallStatus.FINISHED);
             setAssistantTranscript(''); // Clear transcript when call ends
             setUserTranscript('');
@@ -167,6 +177,46 @@ function StartInterview() {
             vapi.off("speech-end", handleSpeechEnd);
         };
     }, []);
+
+    const startTimer = () => {
+        const start = Date.now();
+        setStartTime(start);
+        
+        timerRef.current = setInterval(() => {
+            const now = Date.now();
+            const elapsed = now - start;
+            setElapsedTime(elapsed);
+            
+            // Format time as HH:MM:SS
+            const hours = Math.floor(elapsed / (1000 * 60 * 60));
+            const minutes = Math.floor((elapsed % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((elapsed % (1000 * 60)) / 1000);
+            
+            const formattedTime = 
+                `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            setDuration(formattedTime);
+        }, 1000);
+    };
+
+    const stopTimer = () => {
+        if (timerRef.current) {
+            clearInterval(timerRef.current);
+            timerRef.current = null;
+        }
+    };
+
+    const getDurationInSeconds = () => {
+        return Math.floor(elapsedTime / 1000);
+    };
+
+    const formatDurationForDB = () => {
+        const totalSeconds = getDurationInSeconds();
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+        return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    };
 
     const startCall = async() => {
 
@@ -246,6 +296,7 @@ function StartInterview() {
         if (isCallActive !== CallStatus.ACTIVE) return;
 
         const vapi = vapiRef.current;
+        stopTimer();
         setIsCallActive(CallStatus.FINISHED)
         vapi.stop();
         toast('Interview ended... please wait...');
@@ -285,7 +336,8 @@ function StartInterview() {
                     interview_id: interview_id,
                     feedback: JSON.parse(FINAL_CONTENT),
                     recommendation: false,
-                    conversation: JSON.stringify(filteredArray)
+                    conversation: JSON.stringify(filteredArray),
+                    interviewDuration: formatDurationForDB()
                     },
                 ])
                 .select();
@@ -311,7 +363,7 @@ function StartInterview() {
                 <h2 className='font-bold text-xl flex justify-between'>AI Interview Session
                     <span className='flex gap-2 items-center'>
                         <Timer />
-                            00:00:00
+                        {duration}
                     </span>
                 </h2>
 
