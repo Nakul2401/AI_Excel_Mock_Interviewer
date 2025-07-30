@@ -18,7 +18,7 @@ export async function POST(req) {
 
         const result = await client.chat.completions.create({
             messages: [
-            { role: "system", content: "You are an helpful assistant" },
+            { role: "system", content: "I will give transcript and you assess the candidate" },
             { role: "user", content: FINAL_PROMPT },
             ],
             model: "gpt-4o",
