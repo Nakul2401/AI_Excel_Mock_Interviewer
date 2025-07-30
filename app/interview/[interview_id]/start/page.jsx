@@ -23,8 +23,8 @@ function StartInterview() {
     // const vapi = new Vapi(process.env.NEXT_PUBLIC_VAPI_PUBLIC_KEY);
     const [activeUser, setActiveUser] = useState(false);
     const [conversation, setConversation] = useState();
-    const [assistantTranscript, setAssistantTranscript] = useState(''); // New state for transcript
-    const [userTranscript, setUserTranscript] = useState(''); // New state for user transcript
+    const [assistantTranscript, setAssistantTranscript] = useState(''); 
+    const [userTranscript, setUserTranscript] = useState('');
     const {interview_id} = useParams();
     const router = useRouter();
     const [loading, setLoading] = useState(false);
@@ -54,7 +54,7 @@ function StartInterview() {
                 style: {
                     background: 'white',
                     color: 'black',
-                    border: '2px solid #0000FF',
+                    border: '2px solid #0041C2',
                     borderRadius: '8px',
                     padding: '12px 16px',
                     fontSize: '14px'
@@ -84,7 +84,7 @@ function StartInterview() {
         const handleMessage = (message) => {
             console.log('Message', message);
             
-            // Handle transcript messages
+            
             if (message?.type === 'transcript') {
                 if (message.role === 'assistant') {
                     setAssistantTranscript(message.transcript);
@@ -120,7 +120,7 @@ function StartInterview() {
             console.log('Call has ended.');
             stopTimer();
             setIsCallActive(CallStatus.FINISHED);
-            setAssistantTranscript(''); // Clear transcript when call ends
+            setAssistantTranscript(''); 
             setUserTranscript('');
         };
 
@@ -132,7 +132,7 @@ function StartInterview() {
         const handleSpeechEnd = () => {
             console.log('Assistant Speech has ended.');
             setActiveUser(true);
-            // Clear assistant transcript when speech ends
+            
             setAssistantTranscript('');
         };
 
@@ -235,7 +235,7 @@ function StartInterview() {
 
         const assistantOptions = {
             name: "Interviewer",
-            firstMessage: "Hii "+interviewInfo?.userName+", how are you? Ready for your interview on "+interviewInfo?.interviewData?.jobRole+"? ",
+            firstMessage: "Hii, how are you? Ready for your interview on "+interviewInfo?.interviewData?.jobRole+"? ",
             transcriber: {
                 provider: "deepgram",
                 model: "nova-2",
@@ -317,8 +317,11 @@ function StartInterview() {
             const conversationArray = JSON.parse(conversation);
             const filteredArray = conversationArray.slice(1);
 
+            const questionList = interviewInfo?.interviewData?.questionList || [];
+
             const result = await axios.post('/api/ai-feedback', {
-                conversation: JSON.stringify(filteredArray)
+                conversation: JSON.stringify(filteredArray),
+                questionList: questionList
             });
             
             console.log(result?.data);
@@ -403,7 +406,6 @@ function StartInterview() {
                 </div>
 
                 <div className='flex items-center justify-center flex-col mt-8'>
-                    {/* <Mic className='h-14 w-14 p-4 bg-primary rounded-full text-white cursor-pointer'/> */}
                     {loading ? (
                         <Loader2Icon className='h-15 w-15 p-4 animate-spin text-gray-500'/>
                     ) : (

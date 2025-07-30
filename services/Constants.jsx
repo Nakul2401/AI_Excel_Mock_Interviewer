@@ -79,22 +79,39 @@ The goal is to create a structured, relevant, and time-efficient set of question
 
 
 export const FEEDBACK_PROMPT = `
+Your are an Data Analyst with skills in Microsoft Excel who evaluates interview conversation between assistant and candidate.
+Below is the interview conversation between the assistant and candidate along with original list of questions which were needed to be asked in the interview.
+
+Conversation:
 {{conversation}}
 
-Your are an Data Analyst with skills in Microsoft Excel who assess interview conversation between assistant and candidate. Depending on above Interview Conversation between assitant and candidate, 
-Give me feedback for candidate interview. Give me rating out of 10 for technical Skills, Communication, Problem Solving, Experience.
-Also give me brief summary about the interview and one line to let me know whether candidate is recommended to be hired for the role Data Analyst (Microsoft Excel) in company or not with message. 
+Original questions that were prepared for the role Data Analyst (Microsoft Excel) interview:
+{{questionList}}
+
+Depending on above Interview Conversation between assistant and candidate, and original questions provided. Your task is to evaluate the candidate based on structured categories. Be thorough and detailed in your analysis.
+
+Please score the candidate from 0 to 10 in the following areas. Do not add categories other than the ones provided:
+    - **Communication Skills**: Clarity, articulation, structured responses.
+    - **Technical Knowledge**: Understanding of key concepts for the role.
+    - **Problem-Solving**: Ability to analyze problems and propose solutions.
+    - **Role Fit**: Alignment with the job role.
+    - **Confidence & Clarity**: Confidence in responses, engagement, and clarity.
+
+Give me detailed go through and summary about the interview, with recommendation Yes or No and one line to let me know whether candidate is recommended to be hired for the role Data Analyst (Microsoft Excel) in company or not in the recommendation message. 
+Also give me the total questions answered like example: 5/10
 
 Give me response in valid JSON format:
 {
     feedback:{
-        rating:{
+        score:{
             techicalSkills:,
-            communication:,
+            communicationSkills:,
             problemSolving:,
-            experience:
+            roleFit:,
+            confidence&clarity:
         },
-        summary:'<brief summary>',
+        totalQuestionsAnswered:''
+        summary:'<detailed go thorugh and  summary>',
         recommendation:'',
         recommendationMessage:''
     }

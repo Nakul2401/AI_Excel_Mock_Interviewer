@@ -10,8 +10,17 @@ export async function POST(req) {
     const apiVersion = process.env.OPENAI_API_VERSION || "2024-05-01-preview";
     const deployment = process.env.AZURE_OPENAI_DEPLOYMENT_NAME || "gpt-4o"; //This must match your deployment name 
 
-    const {conversation} = await req.json();
-    const FINAL_PROMPT = FEEDBACK_PROMPT.replace('{{conversation}}', JSON.stringify(conversation))
+    const { conversation, questionList } = await req.json();
+    
+    const formattedQuestions = questionList 
+        ? questionList.map((item, index) => `${index + 1}. ${item.question}`).join('\n')
+        : '';
+    
+    const FINAL_PROMPT = FEEDBACK_PROMPT
+        .replace('{{conversation}}', JSON.stringify(conversation))
+        .replace('{{questionList}}', formattedQuestions)
+
+    // console.log(formattedQuestions);
 
     try{
         const client = new AzureOpenAI({ endpoint, apiKey, apiVersion, deployment });

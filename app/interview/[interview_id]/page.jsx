@@ -80,7 +80,7 @@ function Interview() {
                 className='w-[290px] my-6'/>
 
                 <h2 className='font-bold text-xl'>{interviewData?.jobRole}</h2>
-                <h2 className='flex gap-2 items-center text-gray-500 mt-2'><Clock className='h-4 w-4'/> {interviewData?.duration}</h2>
+                {/* <h2 className='flex gap-2 items-center text-gray-500 mt-2'><Clock className='h-4 w-4'/> {interviewData?.duration}</h2> */}
 
                 <div className='w-full mt-3 mb-2'>
                     <h2 className='mb-1'>Enter Your Full Name:</h2>
