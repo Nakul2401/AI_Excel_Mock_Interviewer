@@ -87,15 +87,15 @@ Depending on above Interview Conversation between assistant and candidate, and o
 
 Please score the candidate from 0 to 10 in the following areas. Do not add categories other than the ones provided:
     - **Communication Skills**: Clarity, articulation, structured responses.
-    - **Technical Knowledge**: Understanding of key concepts for the role.
-    - **Problem-Solving**: Ability to analyze problems and propose solutions.
+    - **Technical Skills**: Understanding of key concepts for the role.
+    - **Problem Solving**: Ability to analyze problems and propose solutions.
     - **Role Fit**: Alignment with the job role.
     - **Confidence & Clarity**: Confidence in responses, engagement, and clarity.
 
 Give me detailed go through and summary about the interview, with recommendation Yes or No and one line to let me know whether candidate is recommended to be hired for the role Data Analyst (Microsoft Excel) in company or not in the recommendation message. 
 Also give me the total questions answered like example: 5/10
 
-Give me response in valid JSON format:
+Give me response in below valid JSON format exactly:
 {
     feedback:{
         score:{
