@@ -30,9 +30,19 @@ function InterviewLink({ interview_id, formData}) {
         });
     }
 
-    const onShareLink = () => {
-        toast('Feature not configured!, You can copy link')
+    const onSendEmail = () => {
+        window.location.href = `mailto:?subject=${encodeURIComponent("AI Based Microsoft Excel Interview")}&body=${encodeURIComponent("Interview Link: \n\n " + url)}`;
     }
+
+    const onSendWtsp = () => {
+        const message = `Interview Link: ${url}`;
+        window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, "_blank");
+    }
+
+    const onSendSlack = () => {
+        toast("Feature not configured yet! Please try another option");
+    }
+    
 
     const numbersOfQuestions = async() => {
         let { data: Interviews, error } = await supabase
@@ -85,9 +95,9 @@ function InterviewLink({ interview_id, formData}) {
         <div className='mt-5 bg-white p-7 rounded-lg w-full'>
             <h2 className='font-bold'>Share Via </h2>
             <div className='flex mt-3 justify-between items-center'>
-                <Button className='w-60 border border-primary text-black bg-white hover:bg-primary hover:text-white hover:border-0' onClick={()=>onShareLink()}><Mail/> Email</Button>
-                <Button className='w-60 border border-primary text-black bg-white hover:bg-primary hover:text-white hover:border-0' onClick={()=>onShareLink()}><MessageCircleMore/> Whatsapp</Button>
-                <Button className='w-60 border border-primary text-black bg-white hover:bg-primary hover:text-white hover:border-0' onClick={()=>onShareLink()}><Slack/> Slack</Button>
+                <Button className='w-60 border border-primary text-black bg-white hover:bg-primary hover:text-white hover:border-0' onClick={() => onSendEmail()}><Mail/> Email</Button>
+                <Button className='w-60 border border-primary text-black bg-white hover:bg-primary hover:text-white hover:border-0' onClick={()=>onSendWtsp()}><MessageCircleMore/> Whatsapp</Button>
+                <Button className='w-60 border border-primary text-black bg-white hover:bg-primary hover:text-white hover:border-0' onClick={()=>onSendSlack()}><Slack/> Slack</Button>
             </div>
         </div>
 
