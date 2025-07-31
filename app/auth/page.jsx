@@ -3,8 +3,13 @@ import React, { useEffect } from 'react'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { supabase } from '@/services/supabaseClient'
+import { useUser } from '../provider'
+
 
 function Login() {
+
+  // const router = useRouter();
+  const { setUser } = useUser();
 
   useEffect(()=>{
     const signOutAndClearUser = async () => {
