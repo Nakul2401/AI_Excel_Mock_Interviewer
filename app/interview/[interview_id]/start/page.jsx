@@ -20,7 +20,6 @@ function StartInterview() {
 
     const {interviewInfo, setInterviewInfo} = useContext(InterviewDataContext);
 
-    // const vapi = new Vapi(process.env.NEXT_PUBLIC_VAPI_PUBLIC_KEY);
     const [activeUser, setActiveUser] = useState(false);
     const [conversation, setConversation] = useState();
     const [assistantTranscript, setAssistantTranscript] = useState(''); 
@@ -48,8 +47,25 @@ function StartInterview() {
         };
       }, []);
 
+    // Initialize Vapi only on client side
+    useEffect(() => {
+        if (typeof window !== 'undefined' && !vapiRef.current) {
+            const vapiKey = process.env.NEXT_PUBLIC_VAPI_PUBLIC_KEY;
+            
+            if (!vapiKey) {
+                console.error('VAPI_PUBLIC_KEY is not defined');
+                toast.error('Configuration error. Please contact support.');
+                return;
+            }
+            
+            console.log('Initializing Vapi with key:', vapiKey.substring(0, 10) + '...');
+            vapiRef.current = new Vapi(vapiKey);
+        }
+    }, []);
+
     useEffect(()=>{
         if(interviewInfo && vapiRef.current){
+            console.log('Starting call with interview info:', interviewInfo);
             toast("Connecting the call with Interviewer",{
                 style: {
                     background: 'white',
@@ -61,6 +77,9 @@ function StartInterview() {
             }
             });
             startCall();
+        } else if (interviewInfo && !vapiRef.current) {
+            console.error('Vapi not initialized but interview info available');
+            toast.error('Voice service not initialized. Please refresh the page.');
         }
     },[interviewInfo])
 
@@ -74,16 +93,12 @@ function StartInterview() {
 
     // Setup event listeners
     useEffect(() => {
-
-        if (!vapiRef.current) {
-            vapiRef.current = new Vapi(process.env.NEXT_PUBLIC_VAPI_PUBLIC_KEY);
-        }
+        if (!vapiRef.current) return;
         
         const vapi = vapiRef.current;
 
         const handleMessage = (message) => {
             console.log('Message', message);
-            
             
             if (message?.type === 'transcript') {
                 if (message.role === 'assistant') {
@@ -132,12 +147,11 @@ function StartInterview() {
         const handleSpeechEnd = () => {
             console.log('Assistant Speech has ended.');
             setActiveUser(true);
-            
             setAssistantTranscript('');
         };
 
         const handleError = (error) => {
-            console.log('Error', error);
+            console.error('Vapi Error:', error);
             
             const errorMessage = error?.error?.message || 
                                 error?.message || 
@@ -146,12 +160,14 @@ function StartInterview() {
                                 error?.error?.msg ||
                                 JSON.stringify(error);
             
+            console.log('Parsed error message:', errorMessage);
+            
             if (errorMessage?.includes('Wallet Balance') || 
                 errorMessage?.includes('credits') || 
                 errorMessage?.includes('insufficient funds') ||
                 errorMessage?.includes('quota') ||
                 error?.error?.status === 400 ||
-                error?.response?.status === 402) { // Payment required status
+                error?.response?.status === 402) {
                 toast.error('Error starting call, Please try again.');
             } 
             else if (errorMessage?.includes('Meeting has ended') || 
@@ -159,6 +175,11 @@ function StartInterview() {
                 error?.action === 'error' && errorMessage?.includes('ended')) {
                 toast.info('Interview ended due to Silence.');
             }
+            else {
+                toast.error('Connection error. Please try again.');
+            }
+            
+            setIsCallActive(CallStatus.INACTIVE);
         };
 
         vapi.on('call-start', handleCallStart);
@@ -166,8 +187,7 @@ function StartInterview() {
         vapi.on("message", handleMessage);
         vapi.on('speech-start', handleSpeechStart);
         vapi.on('speech-end', handleSpeechEnd);
-        vapi.on('error', handleError)
-        
+        vapi.on('error', handleError);
 
         return () => {
             vapi.off("call-start", handleCallStart);
@@ -175,8 +195,9 @@ function StartInterview() {
             vapi.off("message", handleMessage);
             vapi.off("speech-start", handleSpeechStart);
             vapi.off("speech-end", handleSpeechEnd);
+            vapi.off('error', handleError);
         };
-    }, []);
+    }, [vapiRef.current]);
 
     const startTimer = () => {
         const start = Date.now();
@@ -219,80 +240,96 @@ function StartInterview() {
     };
 
     const startCall = async() => {
+        try {
+            const vapi = vapiRef.current;
+            if (!vapi) {
+                console.error("Vapi not initialized");
+                toast.error('Voice service not ready. Please refresh the page.');
+                return;
+            }
 
-        const vapi = vapiRef.current;
-        if (!vapi) {
-            console.warn("Vapi not initialized yet");
-            return;
+            if (!interviewInfo?.interviewData?.questionList) {
+                console.error("No questions found");
+                toast.error('Interview questions not loaded. Please try again.');
+                return;
+            }
+
+            console.log('Setting call status to CONNECTING');
+            setIsCallActive(CallStatus.CONNECTING);
+
+            let questionList = "";
+            interviewInfo?.interviewData?.questionList.forEach((item, index) => {
+                questionList += item?.question + (index < interviewInfo.interviewData.questionList.length - 1 ? ", " : "");
+            });
+
+            console.log('Questions prepared:', questionList);
+
+            const assistantOptions = {
+                name: "Interviewer",
+                firstMessage: "Hi, how are you? Ready for your interview on "+interviewInfo?.interviewData?.jobRole+"? ",
+                transcriber: {
+                    provider: "deepgram",
+                    model: "nova-2",
+                    language: "en-US",
+                },
+                voice: {
+                    provider: "playht",
+                    voiceId: "jennifer",
+                },
+                model: {
+                    provider: "openai",
+                    model: "gpt-4",
+                    messages: [
+                        {
+                            role: "system",
+                            content: `
+            You are a professional assistant conducting interviews for the company Coding ninjas.
+            Your job is to ask candidates provided interview questions, assess their responses.
+            
+            Wait for the candidate to confirm if they are ready and then start
+            Make sure to start the conversation with a friendly introduction, setting a relaxed yet professional tone like example:
+            "Thank you for applying for the position `+interviewInfo?.interviewData?.jobRole+` in Coding ninjas, Welcome to the interview. Let's get started with a few questions!"
+            
+            Ask one question at a time and wait for the candidate's response before proceeding. Keep the questions clear and concise. Below are the questions ask one by one:
+            Questions: `+questionList+`
+
+            
+            - If the candidate struggles, offer short hints (not complete answer) or rephrase the question without completely telling the answer.
+            - Listen actively to the responses, Provide brief, encouraging feedback after each answer. Example:
+                "Nice! That's a solid answer."
+                "Hmm, not quite! Want to try again?"
+            - Engage naturally and use casual phrases like example "Alright next up..." or "Let's tackle a tricky one!"
+            - Ask brief follow-up questions if a response is vague or requires more detail.
+            - Keep the conversation flowing smoothly while maintaining control.
+
+            After all the questions, conclude the interview properly by briefly summarizing their performance:
+            Thank the candidate for their time.
+            Inform them that the company will reach out soon with feedback.
+            End the conversation on a polite and positive note.
+
+            Key Guidelines:
+            - Be friendly, engaging, and polite.
+            - Keep responses short and natural, like a real conversation. Don't Ramble for too long.
+            - Adapt based on the candidate's confidence level
+            - Ensure the interview remains focused on provided questions and specified position `+interviewInfo?.interviewData?.jobRole+`
+            `.trim(),
+                        },
+                    ],
+                },
+            };
+           
+            console.log('Starting Vapi call with options:', assistantOptions);
+            await vapi.start(assistantOptions);
+            console.log('Vapi call started successfully');
+            
+        } catch (error) {
+            console.error('Error starting call:', error);
+            setIsCallActive(CallStatus.INACTIVE);
+            toast.error('Failed to start interview. Please try again.');
         }
-
-        setIsCallActive(CallStatus.CONNECTING);
-
-        let questionList = "";
-        interviewInfo?.interviewData?.questionList.forEach((item, index) => {
-            questionList += item?.question + (index < interviewInfo.interviewData.questionList.length - 1 ? ", " : "");
-        });
-
-        const assistantOptions = {
-            name: "Interviewer",
-            firstMessage: "Hii, how are you? Ready for your interview on "+interviewInfo?.interviewData?.jobRole+"? ",
-            transcriber: {
-                provider: "deepgram",
-                model: "nova-2",
-                language: "en-US",
-            },
-            voice: {
-                provider: "playht",
-                voiceId: "jennifer",
-            },
-            model: {
-                provider: "openai",
-                model: "gpt-4",
-                messages: [
-                    {
-                        role: "system",
-                        content: `
-        You are an professional assistant conducting interviews for the company Coding ninjas.
-        Your job is to ask candidates provided interview questions, assess their responses.
-        
-        Wait for the candidate to confirm if they are ready and then start
-        Make sure to start the conversation with a friendly introduction, setting a relaxed yet professional tone like example:
-        "Thank you for applying for the position `+interviewInfo?.interviewData?.jobRole+` in Coding ninjas, Welcome to the interview. Let's get started with a few questions!"
-        
-        Ask one question at a time and wait for the candidate's response before proceeding. Keep the questions clear and concise. Below are the questions ask one by one:
-        Questions: `+questionList+`
-
-        
-        - If the candidate struggles, offer short hints (not complete answer) or rephrase the question without completely telling the answer.
-        - Listen actively to the responses, Provide brief, encouraging feedback after each answer. Example:
-            "Nice! That's a solid answer."
-            "Hmm, not quite! Want to try again?"
-        - Engage naturally and use casual phrases like example "Alright next up..." or "Let's tackle a tricky one!"
-        - Ask brief follow-up questions if a response is vague or requires more detail.
-        - Keep the conversation flowing smoothly while maintaining control.
-
-        After all the questions, conclude the interview properly by briefly summarizing their performance:
-        Thank the candidate for their time.
-        Inform them that the company will reach out soon with feedback.
-        End the conversation on a polite and positive note.
-
-        Key Guidelines:
-        - Be friendly, engaging, and polite.
-        - Keep responses short and natural, like a real conversation. Don't Ramble for too long.
-        - Adapt based on the candidate's confidence level
-        - Ensure the interview remains focused on provided questions and specified position `+interviewInfo?.interviewData?.jobRole+`
-        `.trim(),
-                    },
-                ],
-            },
-        };
-       
-        await vapi.start(assistantOptions);
-        
     }
 
     const stopInterview = async () => {
-
         if (isCallActive !== CallStatus.ACTIVE) return;
 
         const vapi = vapiRef.current;
@@ -300,12 +337,10 @@ function StartInterview() {
         setIsCallActive(CallStatus.FINISHED)
         vapi.stop();
         toast('Interview ended... please wait...');
-
     }
 
     const GenerateFeedback = async() => {
-
-        if (loading) return; // Prevent multiple calls
+        if (loading) return;
         setLoading(true);
         
         try {
@@ -351,7 +386,6 @@ function StartInterview() {
                 console.log('Feedback saved:', data);
             }
         
-            
         } catch (error) {
             console.error('Error generating feedback:', error);
             toast.error('Error generating feedback');
@@ -381,6 +415,13 @@ function StartInterview() {
                         </div>
                         <h2 className='font-medium'>AI Recruiter (Agent)</h2>
                         
+                        {/* Call Status Display */}
+                        {isCallActive === CallStatus.CONNECTING && (
+                            <div className='absolute bottom-4 left-4 right-4 bg-blue-100 p-4 rounded-lg border-l-4 border-blue-500'>
+                                <p className='text-sm text-blue-800 italic leading-relaxed'>Connecting to interviewer...</p>
+                            </div>
+                        )}
+                        
                         {/* Assistant Transcript Display */}
                         {assistantTranscript && (
                             <div className='absolute bottom-4 left-4 right-4 bg-gray-100 p-4 rounded-lg border-l-4 border-blue-500'>
@@ -392,9 +433,9 @@ function StartInterview() {
                     <div className='bg-white h-[400px] rounded-lg border flex flex-col gap-3 items-center justify-center relative'>
                         <div className='relative'>
                         {activeUser&&<span className='absolute inset-0 rounded-full bg-primary opacity-75 animate-ping'/>}
-                            <h2 className='text-3xl bg-primary p-5 px-7.5 text-white rounded-full'>{interviewInfo?.userName[0]}</h2>
+                            <h2 className='text-3xl bg-primary p-5 px-7.5 text-white rounded-full'>{interviewInfo?.userName?.[0] || 'U'}</h2>
                         </div>
-                        <h2 className='font-medium'>{interviewInfo?.userName}</h2>
+                        <h2 className='font-medium'>{interviewInfo?.userName || 'User'}</h2>
                         
                         {/* User Transcript Display */}
                         {userTranscript && (
@@ -416,7 +457,11 @@ function StartInterview() {
                             onClick={stopInterview}
                         />
                     )}
-                    <h2 className='mt-9 text-gray-500'>Interview in process...</h2>
+                    <h2 className='mt-9 text-gray-500'>
+                        {isCallActive === CallStatus.CONNECTING ? 'Connecting to interviewer...' : 
+                         isCallActive === CallStatus.ACTIVE ? 'Interview in process...' : 
+                         'Interview session'}
+                    </h2>
                 </div>
             </div>
         </div>
