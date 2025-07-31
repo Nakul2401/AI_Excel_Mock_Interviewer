@@ -99,7 +99,7 @@ Give me response in below valid JSON format exactly:
 {
     feedback:{
         score:{
-            techicalSkills:,
+            technicalSkills:,
             communicationSkills:,
             problemSolving:,
             roleFit:,

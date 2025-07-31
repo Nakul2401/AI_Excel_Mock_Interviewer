@@ -1,14 +1,8 @@
-import { Button } from "@/components/ui/button";
-import Image from "next/image";
-import Provider from "./provider";
-
+"use client"
+import Login from './auth/page';
 
 export default function Home() {
-
-  return (
-      <div>
-        <h2>Ai interview platform</h2>
-        <Button>Helloooo</Button>
-      </div>
-  );
+  // Always show login page - let auth/page.jsx handle the redirect logic
+  return <Login />;
 }
+
