@@ -106,7 +106,7 @@ Give me response in below valid JSON format exactly:
             confidence&clarity:
         },
         totalQuestionsAnswered:''
-        summary:'<detailed go thorugh and  summary>',
+        summary:'<detailed go thorugh and summary>',
         recommendation:'',
         recommendationMessage:''
     }
