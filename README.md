@@ -1,6 +1,6 @@
 # AI Agents-Powered Excel Interview Platform
 
-### Deplyoyed Link:
+### Deployed Link:
 https://ai-excel-mock-interviewer.vercel.app/
 
 ### Demonstration Link: 
