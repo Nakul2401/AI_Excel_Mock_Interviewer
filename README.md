@@ -1,9 +1,10 @@
 # AI Powered Excel Interviewer Platform
-### Demonstration Link: 
-https://drive.google.com/file/d/14_fooDwojS7qTNY_lMkdC62uSMDOn6li/view?usp=sharing
 
 ### Deplyoyed Link:
-Deployed Link: https://ai-excel-mock-interviewer.vercel.app/
+https://ai-excel-mock-interviewer.vercel.app/
+
+### Demonstration Link: 
+https://drive.google.com/file/d/14_fooDwojS7qTNY_lMkdC62uSMDOn6li/view?usp=sharing
 
 ### Workflow & Design:
 https://app.eraser.io/workspace/GZWF2Yo2aQ0nmvOE1pWM?origin=share
